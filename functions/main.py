@@ -8,8 +8,9 @@ import base64
 from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 import io
-from pydub import AudioSegment
 import json
+import os
+from pydub import AudioSegment
 
 #initialize_app()
 
@@ -18,7 +19,7 @@ import json
         cors_origins="*", 
         cors_methods=["post"]))
 
-def date(req: https_fn.Request) -> https_fn.Response:
+def extractAudioData(req: https_fn.Request) -> https_fn.Response:
 
     if req.method != "POST":
         return https_fn.Response(json.dumps({"response": "Invalid request type, only POST requests are allowed"}), mimetype="application/json", status=405)
@@ -30,22 +31,35 @@ def date(req: https_fn.Request) -> https_fn.Response:
     if 'multipart/form-data' in content_type:
         if 'audio' in req.files and req.files['audio'].filename != '':
 
-            filename = secure_filename(req.files['audio'].filename)
+            filename, fileExtension = os.path.splitext(secure_filename(req.files['audio'].filename))
 
-            #reading file
-            fileBytes = req.files['audio'].read()
-            encodedBytes = base64.b64encode(fileBytes).decode('utf-8')
+
+            
+            audiofile = req.files['audio']
+            req.files['audio'].save(f"tmp/{audiofile.filename}")
+
+            file_path = os.path.join("tmp", audiofile.filename)
+            with open(file_path, "rb") as audiofile:
+                audioBinary = audiofile.read()
+
+
+
+            encodedBytes = base64.b64encode(audioBinary).decode('utf-8')
 
             response_data = {
                 "audio": { 
                 "content": encodedBytes,
-                "extension": ".mp4"
+                "extension": fileExtension,
+                "length": "a"
                 },
                 "length": {
 
                 },
                 "result": 1
             }
+
+            
+
 
             return https_fn.Response(json.dumps(response_data), mimetype="application/json", status=200)
         else:
