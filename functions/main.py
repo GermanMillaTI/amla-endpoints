@@ -40,11 +40,10 @@ def extractAudioData(req: https_fn.Request) -> https_fn.Response:
                 "audio": { 
                 "content": encodedBytes,
                 "extension": fileExtension,
-                "length": len(aseg) / 1000
-                }
+                }, 
+                "length": len(aseg) / 1000,
+                "result": 1
             }
-
-            
 
 
             return https_fn.Response(json.dumps(response_data), mimetype="application/json", status=200)
