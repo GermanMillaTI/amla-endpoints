@@ -1,7 +1,3 @@
-# Welcome to Cloud Functions for Firebase for Python!
-# To get started, simply uncomment the below code or create your own.
-# Deploy with `firebase deploy`
-
 from firebase_functions import https_fn, options
 from firebase_admin import initialize_app
 import base64
@@ -33,16 +29,11 @@ def extractAudioData(req: https_fn.Request) -> https_fn.Response:
 
             filename, fileExtension = os.path.splitext(secure_filename(req.files['audio'].filename))
 
-
-            
             audiofile = req.files['audio']
-            req.files['audio'].save(f"tmp/{audiofile.filename}")
 
-            file_path = os.path.join("tmp", audiofile.filename)
-            with open(file_path, "rb") as audiofile:
-                audioBinary = audiofile.read()
-
-
+            #reading binary so it can be processed later
+            audioBinary = audiofile.read()
+            asig = AudioSegment.from_file(io.BytesIO(audioBinary))
 
             encodedBytes = base64.b64encode(audioBinary).decode('utf-8')
 
@@ -50,12 +41,8 @@ def extractAudioData(req: https_fn.Request) -> https_fn.Response:
                 "audio": { 
                 "content": encodedBytes,
                 "extension": fileExtension,
-                "length": "a"
-                },
-                "length": {
-
-                },
-                "result": 1
+                "length": len(asig) / 1000
+                }
             }
 
             
