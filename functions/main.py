@@ -1,7 +1,6 @@
 from firebase_functions import https_fn, options
 from firebase_admin import initialize_app
 import base64
-from werkzeug.datastructures import FileStorage
 from werkzeug.utils import secure_filename
 import io
 import json
@@ -33,7 +32,7 @@ def extractAudioData(req: https_fn.Request) -> https_fn.Response:
 
             #reading binary so it can be processed later
             audioBinary = audiofile.read()
-            asig = AudioSegment.from_file(io.BytesIO(audioBinary))
+            aseg = AudioSegment.from_file(io.BytesIO(audioBinary))
 
             encodedBytes = base64.b64encode(audioBinary).decode('utf-8')
 
@@ -41,7 +40,7 @@ def extractAudioData(req: https_fn.Request) -> https_fn.Response:
                 "audio": { 
                 "content": encodedBytes,
                 "extension": fileExtension,
-                "length": len(asig) / 1000
+                "length": len(aseg) / 1000
                 }
             }
 
